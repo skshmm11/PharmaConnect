@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PharmaConnect - My Orders</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #e0f7fa 0%, #f0f9ff 100%); min-height: 100vh; color: #0f172a; }
+    .navbar { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 1rem 0; box-shadow: 0 1px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+    .nav-container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #00b4d8, #0077b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-link { color: #334155; text-decoration: none; font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s; }
+    .nav-link:hover { background: #e0f7fa; color: #0077b6; }
+    .signout-btn { background: linear-gradient(135deg, #00b4d8, #0077b6); color: white; padding: 0.75rem 1.5rem; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 1rem; }
+    .page-wrapper { max-width: 1000px; margin: 0 auto; padding: 3rem 2rem; }
+    .page-title { font-size: 2rem; font-weight: 700; margin-bottom: 2rem; }
+    .order-card { background: white; border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 8px 30px rgba(0,180,216,0.08); border: 1px solid rgba(0,180,216,0.15); position: relative; overflow: hidden; }
+    .order-wave { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #00b4d8, #0077b6); }
+    .order-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+    .order-id { font-weight: 700; font-size: 1.1rem; }
+    .order-date { color: #64748b; font-size: 0.9rem; }
+    .order-medicine { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .order-pharmacy { color: #64748b; font-size: 0.95rem; }
+    .order-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; }
+    .order-price { font-size: 1.3rem; font-weight: 800; color: #059669; }
+    .status-badge { padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 700; }
+    .status-pending   { background: #fef3c7; color: #d97706; }
+    .status-confirmed { background: #dbeafe; color: #2563eb; }
+    .status-ready     { background: #d1fae5; color: #059669; }
+    .status-completed { background: #e0e7ff; color: #4338ca; }
+    .empty-state { text-align: center; padding: 5rem 2rem; color: #64748b; }
+    .empty-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .empty-text { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .go-search { display: inline-block; margin-top: 1.5rem; background: linear-gradient(135deg, #00b4d8, #0077b6); color: white; padding: 0.85rem 2rem; border-radius: 12px; text-decoration: none; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">🧬 PharmaConnect</div>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Find Medicines</a>
+        <a href="orders.html" class="nav-link">My Orders</a>
+        <button class="signout-btn" onclick="signOut()">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+  <div class="page-wrapper">
+    <div class="page-title">📦 My Orders</div>
+    <div id="ordersContainer"></div>
+  </div>
+  <script>
+    if (!sessionStorage.getItem('pharmaUser')) window.location.href = 'login.html';
+    function signOut() { sessionStorage.removeItem('pharmaUser'); window.location.href = 'login.html'; }
+    const orders = [
+      { id:"ORD-001", medicine:"Paracetamol 500mg", pharmacy:"City Med Store, Model Town",        qty:2, price:50,  date:"Mar 7, 2026 · 2:32 PM",  status:"confirmed" },
+      { id:"ORD-002", medicine:"Dolo 650mg",         pharmacy:"HealthPlus Pharmacy, Civil Lines", qty:1, price:27,  date:"Mar 6, 2026 · 11:14 AM", status:"completed" },
+      { id:"ORD-003", medicine:"Ibuprofen 400mg",    pharmacy:"City Med Store, Model Town",        qty:3, price:75,  date:"Mar 5, 2026 · 9:00 AM",  status:"ready"     },
+    ];
+    document.getElementById('ordersContainer').innerHTML = orders.length
+      ? orders.map(o => `
+          <div class="order-card">
+            <div class="order-wave"></div>
+            <div class="order-top">
+              <div><div class="order-id">${o.id}</div><div class="order-date">${o.date}</div></div>
+              <span class="status-badge status-${o.status}">${o.status.charAt(0).toUpperCase()+o.status.slice(1)}</span>
+            </div>
+            <div class="order-medicine">${o.medicine}</div>
+            <div class="order-pharmacy">🏪 ${o.pharmacy} · Qty: ${o.qty}</div>
+            <div class="order-bottom"><div class="order-price">₹${o.price}</div></div>
+          </div>`).join('')
+      : `<div class="empty-state"><div class="empty-icon">🛒</div><div class="empty-text">No orders yet</div><p>Search for medicines and place your first order.</p><a href="index.html" class="go-search">Find Medicines →</a></div>`;
+  </script>
+</body>
+</html>

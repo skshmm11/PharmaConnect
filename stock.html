@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PharmaConnect - Stock Management Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #e0f7fa 0%, #f0f9ff 100%); min-height: 100vh; color: #0f172a; }
+    .navbar { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 1rem 0; box-shadow: 0 1px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+    .nav-container { max-width: 1300px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #00b4d8, #0077b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+    .nav-link { color: #334155; text-decoration: none; font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s; }
+    .nav-link:hover { background: #e0f7fa; color: #0077b6; }
+    .user-badge { background: #eff6ff; color: #1d4ed8; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; font-size: 0.9rem; }
+    .signout-btn { background: linear-gradient(135deg, #00b4d8, #0077b6); color: white; padding: 0.6rem 1.25rem; border-radius: 10px; font-weight: 600; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+    .page-wrapper { max-width: 1300px; margin: 0 auto; padding: 2rem; }
+    .page-header { background: white; border-radius: 24px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 10px 40px rgba(0,180,216,0.1); border: 1px solid rgba(0,180,216,0.2); display: flex; align-items: center; gap: 1rem; }
+    .portal-icon { width: 64px; height: 64px; background: linear-gradient(135deg, #00b4d8, #0077b6); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+    .header-title { font-size: 1.8rem; font-weight: 700; }
+    .header-sub { color: #64748b; margin-top: 0.2rem; }
+    .alerts-section { margin-bottom: 2rem; }
+    .alert-card { border-radius: 16px; padding: 1rem 1.5rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 1rem; border-left: 4px solid; }
+    .alert-expired  { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+    .alert-expiring { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
+    .alert-icon { font-size: 1.4rem; }
+    .alert-text { font-weight: 600; }
+    .alert-sub { font-size: 0.85rem; opacity: 0.8; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .stat-card { background: white; padding: 1.75rem; border-radius: 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,180,216,0.1); border: 1px solid rgba(0,180,216,0.15); }
+    .stat-number { font-size: 2.5rem; font-weight: 800; color: #00b4d8; }
+    .stat-number.red { color: #dc2626; }
+    .stat-number.orange { color: #f59e0b; }
+    .stat-label { color: #64748b; margin-top: 0.4rem; font-size: 0.95rem; }
+    .two-col { display: grid; grid-template-columns: 1fr 1.8fr; gap: 2rem; margin-bottom: 2rem; }
+    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+    .panel { background: white; border-radius: 24px; padding: 2rem; box-shadow: 0 10px 40px rgba(0,180,216,0.08); border: 1px solid rgba(0,180,216,0.15); }
+    .panel-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; }
+    .barcode-area { border: 2px dashed #00b4d8; border-radius: 16px; padding: 2rem; text-align: center; background: #f0fdff; margin-bottom: 1.5rem; cursor: pointer; transition: all 0.2s; }
+    .barcode-area:hover { background: #e0f7fa; }
+    .barcode-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .barcode-text { color: #0077b6; font-weight: 600; margin-bottom: 0.25rem; }
+    .barcode-sub { color: #64748b; font-size: 0.85rem; }
+    .barcode-input-row { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; }
+    .barcode-input { flex: 1; padding: 0.85rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 1rem; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; }
+    .barcode-input:focus { border-color: #00b4d8; }
+    .scan-btn { background: linear-gradient(135deg, #00b4d8, #0077b6); color: white; border: none; padding: 0.85rem 1.25rem; border-radius: 10px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap; }
+    .scanned-result { display: none; background: #f0fdff; border: 1.5px solid #a5f3fc; border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .scanned-result.show { display: block; }
+    .scanned-name { font-size: 1.2rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem; }
+    .scanned-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #e0f7fa; font-size: 0.92rem; }
+    .scanned-row:last-child { border-bottom: none; }
+    .scanned-key { color: #64748b; }
+    .scanned-val { font-weight: 600; }
+    .expiry-warn { background: #fef3c7; color: #d97706; padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.82rem; }
+    .expiry-ok   { background: #d1fae5; color: #059669; padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.82rem; }
+    .expiry-bad  { background: #fee2e2; color: #dc2626; padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.82rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-label { font-size: 0.85rem; font-weight: 600; color: #374151; }
+    .form-input, .form-select { padding: 0.7rem 0.9rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; background: white; }
+    .form-input:focus, .form-select:focus { border-color: #00b4d8; }
+    .add-btn { width: 100%; background: linear-gradient(135deg, #00b4d8, #0077b6); color: white; border: none; padding: 0.9rem; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 0.5rem; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+    .add-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,180,216,0.35); }
+    .table-panel { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
+    .table-header-row { padding: 1.5rem 2rem; background: linear-gradient(135deg, #f8fafc, #e2e8f0); font-size: 1.1rem; font-weight: 700; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+    .search-stock { padding: 0.5rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; font-family: 'Inter', sans-serif; outline: none; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 1rem 1.5rem; text-align: left; }
+    th { background: #f8fafc; font-weight: 600; color: #374151; font-size: 0.9rem; }
+    td { border-bottom: 1px solid #f1f5f9; font-size: 0.92rem; }
+    tr:last-child td { border-bottom: none; }
+    .badge { padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.78rem; font-weight: 700; }
+    .badge-ok       { background: #d1fae5; color: #059669; }
+    .badge-warn     { background: #fef3c7; color: #d97706; }
+    .badge-expired  { background: #fee2e2; color: #dc2626; }
+    .badge-lowstock { background: #ede9fe; color: #7c3aed; }
+    .del-btn  { background: #fee2e2; color: #dc2626; border: none; padding: 0.3rem 0.75rem; border-radius: 8px; cursor: pointer; font-size: 0.82rem; font-weight: 600; font-family: 'Inter', sans-serif; }
+    .edit-btn { background: #eff6ff; color: #2563eb; border: none; padding: 0.3rem 0.75rem; border-radius: 8px; cursor: pointer; font-size: 0.82rem; font-weight: 600; font-family: 'Inter', sans-serif; margin-right: 0.4rem; }
+    .toast { position: fixed; bottom: 2rem; right: 2rem; background: #0f172a; color: white; padding: 1rem 1.5rem; border-radius: 14px; font-weight: 600; z-index: 9999; transform: translateY(100px); opacity: 0; transition: all 0.3s; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">🧬 PharmaConnect</div>
+      <div class="nav-right">
+        <a href="pharmacy.html" class="nav-link">📋 Orders Dashboard</a>
+        <span class="user-badge" id="userBadge">👤 Loading...</span>
+        <button class="signout-btn" onclick="signOut()">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+  <div class="page-wrapper">
+    <div class="page-header">
+      <div class="portal-icon">🏥</div>
+      <div>
+        <div class="header-title">Stock Management Portal</div>
+        <div class="header-sub">Manage inventory, scan barcodes, and track expiry dates</div>
+      </div>
+    </div>
+    <div class="alerts-section" id="alertsSection"></div>
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-title">📷 Barcode Scanner</div>
+        <div class="barcode-area" onclick="simulateScan()">
+          <div class="barcode-icon">▌▌▌ ║▌║ ▌▌</div>
+          <div class="barcode-text">Click to Simulate Scan</div>
+          <div class="barcode-sub">Or enter barcode manually below</div>
+        </div>
+        <div class="barcode-input-row">
+          <input type="text" class="barcode-input" id="barcodeInput" placeholder="Enter barcode number..." />
+          <button class="scan-btn" onclick="lookupBarcode()">🔍 Lookup</button>
+        </div>
+        <div class="scanned-result" id="scannedResult">
+          <div class="scanned-name" id="scannedName"></div>
+          <div id="scannedDetails"></div>
+          <button class="add-btn" style="margin-top:1rem;" onclick="addFromScan()">+ Add to Inventory</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">➕ Add / Update Medicine</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Medicine Name *</label><input type="text" class="form-input" id="fName" placeholder="e.g. Paracetamol 500mg" /></div>
+          <div class="form-group"><label class="form-label">Generic Name</label><input type="text" class="form-input" id="fGeneric" placeholder="e.g. Acetaminophen" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Manufacturer</label><input type="text" class="form-input" id="fMfr" placeholder="e.g. GSK Pharma" /></div>
+          <div class="form-group"><label class="form-label">Batch Number</label><input type="text" class="form-input" id="fBatch" placeholder="e.g. B2025001" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Quantity in Stock *</label><input type="number" class="form-input" id="fQty" placeholder="e.g. 200" min="0" /></div>
+          <div class="form-group"><label class="form-label">Price per Unit (₹) *</label><input type="number" class="form-input" id="fPrice" placeholder="e.g. 25" min="0" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Manufacturing Date</label><input type="date" class="form-input" id="fMfgDate" /></div>
+          <div class="form-group"><label class="form-label">Expiry Date *</label><input type="date" class="form-input" id="fExpiry" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-select" id="fCategory">
+              <option>Analgesic</option><option>Antibiotic</option><option>Antifungal</option>
+              <option>Antiviral</option><option>Cardiovascular</option><option>Diabetes</option>
+              <option>Vitamin / Supplement</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Requires Prescription</label>
+            <select class="form-select" id="fRx"><option value="no">No</option><option value="yes">Yes</option></select>
+          </div>
+        </div>
+        <button class="add-btn" onclick="addMedicine()">✅ Add to Inventory</button>
+      </div>
+    </div>
+    <div class="table-panel">
+      <div class="table-header-row">
+        <span>📦 Current Inventory</span>
+        <input type="text" class="search-stock" id="stockSearch" placeholder="🔍 Search medicines..." oninput="renderTable()" />
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Medicine</th><th>Generic</th><th>Category</th><th>Qty</th><th>Price</th><th>Expiry Date</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="stockTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script>
+    const currentUser = sessionStorage.getItem('pharmaUser');
+    const SPECIAL_IDS = ['DOC001','DOC002','PHR001','PHR002'];
+    if (!currentUser || !SPECIAL_IDS.includes(currentUser.toUpperCase())) window.location.href = 'login.html';
+    document.getElementById('userBadge').textContent = '🏥 ' + currentUser.toUpperCase();
+    function signOut() { sessionStorage.removeItem('pharmaUser'); window.location.href = 'login.html'; }
+
+    let stock = JSON.parse(localStorage.getItem('pharmaStock') || 'null') || [
+      { id:1, name:"Paracetamol 500mg", generic:"Acetaminophen",        mfr:"GSK Pharma",  batch:"B2025001", qty:120, price:12, mfgDate:"2024-01-01", expiry:"2026-12-31", category:"Analgesic",  rx:"no"  },
+      { id:2, name:"Dolo 650mg",        generic:"Acetaminophen",        mfr:"Micro Labs",  batch:"D2025022", qty:80,  price:15, mfgDate:"2023-06-01", expiry:"2025-06-30", category:"Analgesic",  rx:"no"  },
+      { id:3, name:"Amoxicillin 250mg", generic:"Amoxicillin",          mfr:"Cipla",       batch:"A2024009", qty:10,  price:45, mfgDate:"2024-03-01", expiry:"2026-03-31", category:"Antibiotic", rx:"yes" },
+      { id:4, name:"Ibuprofen 400mg",   generic:"Ibuprofen",            mfr:"Sun Pharma",  batch:"I2025030", qty:200, price:18, mfgDate:"2025-01-01", expiry:"2027-01-31", category:"Analgesic",  rx:"no"  },
+      { id:5, name:"Crocin 500mg",      generic:"Paracetamol",          mfr:"GSK Pharma",  batch:"C2025015", qty:5,   price:10, mfgDate:"2023-01-01", expiry:"2025-01-31", category:"Analgesic",  rx:"no"  },
+    ];
+    const barcodeDB = {
+      "8901030823611": { name:"Crocin 500mg",  generic:"Paracetamol",          mfr:"GSK Pharma", batch:"C2025999", qty:100, price:10, mfgDate:"2024-06-01", expiry:"2027-06-30", category:"Analgesic",      rx:"no"  },
+      "8901546547832": { name:"Dolo 650mg",    generic:"Acetaminophen",        mfr:"Micro Labs", batch:"D2025100", qty:50,  price:15, mfgDate:"2024-09-01", expiry:"2026-09-30", category:"Analgesic",      rx:"no"  },
+      "4006000000000": { name:"Aspirin 75mg",  generic:"Acetylsalicylic acid", mfr:"Bayer",      batch:"AS2025",   qty:75,  price:8,  mfgDate:"2024-01-01", expiry:"2026-12-31", category:"Cardiovascular", rx:"no"  },
+    };
+    let scannedData = null;
+    function saveStock() { localStorage.setItem('pharmaStock', JSON.stringify(stock)); }
+    function daysUntilExpiry(expiryStr) { const today = new Date(); today.setHours(0,0,0,0); return Math.floor((new Date(expiryStr) - today) / 86400000); }
+    function expiryBadge(expiryStr) {
+      const d = daysUntilExpiry(expiryStr);
+      if (d < 0)   return `<span class="badge badge-expired">Expired</span>`;
+      if (d <= 90) return `<span class="badge badge-warn">Expires in ${d}d</span>`;
+      return `<span class="badge badge-ok">Valid</span>`;
+    }
+    function expiryLabel(expiryStr) {
+      const d = daysUntilExpiry(expiryStr);
+      if (d < 0)   return `<span class="expiry-bad">⛔ Expired</span>`;
+      if (d <= 90) return `<span class="expiry-warn">⚠️ ${d} days left</span>`;
+      return `<span class="expiry-ok">✅ Valid (${d}d)</span>`;
+    }
+    function renderAlerts() {
+      const expired  = stock.filter(s => daysUntilExpiry(s.expiry) < 0);
+      const expiring = stock.filter(s => { const d=daysUntilExpiry(s.expiry); return d>=0&&d<=90; });
+      let html = '';
+      if (expired.length)  html += `<div class="alert-card alert-expired"><span class="alert-icon">⛔</span><div><div class="alert-text">${expired.length} medicine(s) EXPIRED</div><div class="alert-sub">${expired.map(s=>s.name).join(', ')}</div></div></div>`;
+      if (expiring.length) html += `<div class="alert-card alert-expiring"><span class="alert-icon">⚠️</span><div><div class="alert-text">${expiring.length} medicine(s) expiring within 90 days</div><div class="alert-sub">${expiring.map(s=>`${s.name} (${daysUntilExpiry(s.expiry)}d)`).join(', ')}</div></div></div>`;
+      document.getElementById('alertsSection').innerHTML = html;
+    }
+    function renderStats() {
+      const expired  = stock.filter(s => daysUntilExpiry(s.expiry) < 0).length;
+      const expiring = stock.filter(s => { const d=daysUntilExpiry(s.expiry); return d>=0&&d<=90; }).length;
+      const lowstock = stock.filter(s => s.qty < 15).length;
+      document.getElementById('statsGrid').innerHTML = `
+        <div class="stat-card"><div class="stat-number">${stock.length}</div><div class="stat-label">Total Products</div></div>
+        <div class="stat-card"><div class="stat-number red">${expired}</div><div class="stat-label">Expired</div></div>
+        <div class="stat-card"><div class="stat-number orange">${expiring}</div><div class="stat-label">Expiring Soon</div></div>
+        <div class="stat-card"><div class="stat-number orange">${lowstock}</div><div class="stat-label">Low Stock</div></div>
+        <div class="stat-card"><div class="stat-number">${stock.reduce((a,s)=>a+s.qty,0)}</div><div class="stat-label">Total Units</div></div>
+      `;
+    }
+    function renderTable() {
+      const query = (document.getElementById('stockSearch').value||'').toLowerCase();
+      const filtered = stock.filter(s => s.name.toLowerCase().includes(query)||s.generic.toLowerCase().includes(query));
+      document.getElementById('stockTableBody').innerHTML = filtered.length
+        ? filtered.map(s=>`
+            <tr>
+              <td><strong>${s.name}</strong>${s.rx==='yes'?'&nbsp;<span style="font-size:0.75rem;background:#fee2e2;color:#dc2626;padding:0.15rem 0.5rem;border-radius:6px;">Rx</span>':''}</td>
+              <td>${s.generic}</td><td>${s.category}</td>
+              <td>${s.qty}${s.qty<15?'&nbsp;<span class="badge badge-lowstock">Low</span>':''}</td>
+              <td>₹${s.price}</td><td>${s.expiry}</td><td>${expiryBadge(s.expiry)}</td>
+              <td><button class="edit-btn" onclick="editMedicine(${s.id})">✏️</button><button class="del-btn" onclick="deleteMedicine(${s.id})">🗑️</button></td>
+            </tr>`).join('')
+        : `<tr><td colspan="8" style="text-align:center;color:#64748b;padding:2rem;">No medicines found.</td></tr>`;
+    }
+    const mockBarcodes = Object.keys(barcodeDB);
+    function simulateScan() { document.getElementById('barcodeInput').value = mockBarcodes[Math.floor(Math.random()*mockBarcodes.length)]; lookupBarcode(); }
+    function lookupBarcode() {
+      const code = document.getElementById('barcodeInput').value.trim();
+      const result = document.getElementById('scannedResult');
+      if (!code) { showToast('⚠️ Enter a barcode first'); return; }
+      const med = barcodeDB[code];
+      if (!med) { result.classList.remove('show'); showToast('❌ Barcode not found in database'); return; }
+      scannedData = {...med};
+      document.getElementById('scannedName').textContent = med.name;
+      document.getElementById('scannedDetails').innerHTML = `
+        <div class="scanned-row"><span class="scanned-key">Generic Name</span><span class="scanned-val">${med.generic}</span></div>
+        <div class="scanned-row"><span class="scanned-key">Manufacturer</span><span class="scanned-val">${med.mfr}</span></div>
+        <div class="scanned-row"><span class="scanned-key">Batch</span><span class="scanned-val">${med.batch}</span></div>
+        <div class="scanned-row"><span class="scanned-key">Category</span><span class="scanned-val">${med.category}</span></div>
+        <div class="scanned-row"><span class="scanned-key">Mfg. Date</span><span class="scanned-val">${med.mfgDate}</span></div>
+        <div class="scanned-row"><span class="scanned-key">Expiry Date</span><span class="scanned-val">${med.expiry} &nbsp; ${expiryLabel(med.expiry)}</span></div>
+        <div class="scanned-row"><span class="scanned-key">Price</span><span class="scanned-val">₹${med.price}</span></div>
+        <div class="scanned-row"><span class="scanned-key">Prescription</span><span class="scanned-val">${med.rx==='yes'?'Required':'Not Required'}</span></div>
+      `;
+      result.classList.add('show');
+    }
+    function addFromScan() {
+      if (!scannedData) return;
+      stock.push({id:Date.now(),...scannedData}); saveStock(); refresh();
+      showToast(`✅ ${scannedData.name} added to inventory`);
+      document.getElementById('scannedResult').classList.remove('show');
+      document.getElementById('barcodeInput').value = '';
+    }
+    function addMedicine() {
+      const name=document.getElementById('fName').value.trim(), qty=parseInt(document.getElementById('fQty').value), price=parseFloat(document.getElementById('fPrice').value), expiry=document.getElementById('fExpiry').value;
+      if (!name||isNaN(qty)||isNaN(price)||!expiry) { showToast('⚠️ Please fill required fields'); return; }
+      stock.push({id:Date.now(),name,qty,price,expiry,generic:document.getElementById('fGeneric').value.trim()||'-',mfr:document.getElementById('fMfr').value.trim()||'-',batch:document.getElementById('fBatch').value.trim()||'-',mfgDate:document.getElementById('fMfgDate').value||'-',category:document.getElementById('fCategory').value,rx:document.getElementById('fRx').value});
+      saveStock(); refresh(); showToast(`✅ ${name} added to inventory`);
+      ['fName','fGeneric','fMfr','fBatch','fQty','fPrice','fMfgDate','fExpiry'].forEach(id=>document.getElementById(id).value='');
+    }
+    function editMedicine(id) {
+      const item=stock.find(s=>s.id===id); if(!item) return;
+      const nq=prompt(`Update quantity for ${item.name}:`,item.qty); if(nq===null) return;
+      item.qty=parseInt(nq)||item.qty;
+      const np=prompt(`Update price for ${item.name}:`,item.price); if(np!==null) item.price=parseFloat(np)||item.price;
+      saveStock(); refresh(); showToast(`✅ ${item.name} updated`);
+    }
+    function deleteMedicine(id) {
+      const item=stock.find(s=>s.id===id); if(!item) return;
+      if(!confirm(`Remove ${item.name} from inventory?`)) return;
+      stock=stock.filter(s=>s.id!==id); saveStock(); refresh(); showToast(`🗑️ ${item.name} removed`);
+    }
+    function refresh() { renderAlerts(); renderStats(); renderTable(); }
+    function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+    refresh();
+  </script>
+</body>
+</html>

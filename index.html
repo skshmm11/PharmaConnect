@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PharmaConnect - Find Medicines Instantly</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #e0f7fa 0%, #f0f9ff 100%); min-height: 100vh; color: #0f172a; }
+    .navbar { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 1rem 0; box-shadow: 0 1px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+    .nav-container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #00b4d8, #0077b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-link { color: #334155; text-decoration: none; font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s; }
+    .nav-link:hover { background: #e0f7fa; color: #0077b6; }
+    .signout-btn { background: linear-gradient(135deg, #00b4d8, #0077b6); color: white; padding: 0.75rem 1.5rem; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 1rem; }
+    .hero { padding: 4rem 0; text-align: center; }
+    .hero-container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+    .hero h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; background: linear-gradient(135deg, #0f172a, #1e293b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem; line-height: 1.1; }
+    .hero-subtitle { font-size: 1.3rem; color: #475569; margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .search-section { background: white; padding: 3rem 0; }
+    .search-container { max-width: 800px; margin: 0 auto; padding: 1.5rem 2rem; display: flex; gap: 1rem; background: #f8fafc; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
+    .search-input { flex: 1; border: none; outline: none; font-size: 1.2rem; padding: 1rem 1.5rem; background: transparent; font-weight: 500; }
+    .search-btn { background: linear-gradient(135deg, #00b4d8, #0077b6); color: white; border: none; padding: 1.2rem 2.5rem; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
+    .results-section { padding: 4rem 0; }
+    .results-grid { max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(370px, 1fr)); gap: 2rem; }
+    .medicine-card { background: white; border-radius: 24px; padding: 2rem; box-shadow: 0 10px 40px rgba(0,180,216,0.1); border: 1px solid rgba(0,180,216,0.2); transition: all 0.3s; position: relative; overflow: hidden; }
+    .medicine-card:hover { transform: translateY(-8px); box-shadow: 0 20px 60px rgba(0,180,216,0.2); border-color: #00b4d8; }
+    .medicine-wave { position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #00b4d8, #0077b6, #00b4d8); }
+    .medicine-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+    .medicine-icon { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #00b4d8, #0077b6); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+    .medicine-name { font-size: 1.4rem; font-weight: 700; color: #0f172a; margin-bottom: 0.25rem; }
+    .medicine-desc { color: #64748b; font-size: 0.95rem; margin-bottom: 1.5rem; }
+    .pharmacy-info { background: #f1f5f9; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+    .pharmacy-name { font-weight: 600; color: #0f172a; }
+    .pharmacy-addr { font-size: 0.85rem; color: #64748b; width: 100%; margin-top: 0.25rem; }
+    .delivery-badge { margin-left: auto; padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
+    .delivery-yes { background: #d1fae5; color: #059669; }
+    .delivery-no  { background: #f1f5f9; color: #94a3b8; }
+    .price-stock { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .price { font-size: 1.6rem; font-weight: 800; color: #059669; }
+    .stock { color: #059669; font-weight: 600; }
+    .action-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6rem; }
+    .btn-order, .btn-contact, .btn-location { border: none; padding: 0.75rem 0.5rem; border-radius: 10px; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 0.35rem; font-family: 'Inter', sans-serif; }
+    .btn-order.delivery-on { background: linear-gradient(135deg, #00b4d8, #0077b6); color: white; }
+    .btn-order.delivery-on:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,180,216,0.4); }
+    .btn-order.delivery-off { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
+    .btn-contact { background: #f0fdf4; color: #059669; border: 1.5px solid #a7f3d0; }
+    .btn-contact:hover { background: #d1fae5; transform: translateY(-2px); }
+    .btn-location { background: #fff7ed; color: #ea580c; border: 1.5px solid #fed7aa; }
+    .btn-location:hover { background: #ffedd5; transform: translateY(-2px); }
+
+    /* POPUP */
+    .popup-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 999; align-items: center; justify-content: center; }
+    .popup-overlay.active { display: flex; }
+    .popup-box { background: white; border-radius: 24px; padding: 2.5rem; max-width: 420px; width: 90%; box-shadow: 0 30px 80px rgba(0,0,0,0.2); position: relative; }
+    .popup-close { position: absolute; top: 1.25rem; right: 1.25rem; background: #f1f5f9; border: none; border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+    .popup-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; color: #0f172a; }
+    .popup-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; background: #f8fafc; border-radius: 12px; margin-bottom: 0.75rem; }
+    .popup-row-icon { font-size: 1.2rem; }
+    .popup-row-label { font-size: 0.82rem; color: #64748b; }
+    .popup-row-val { font-weight: 600; color: #0f172a; }
+    .call-btn { display: block; width: 100%; margin-top: 1rem; background: linear-gradient(135deg, #00b4d8, #0077b6); color: white; border: none; padding: 0.9rem; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; font-family: 'Inter', sans-serif; }
+
+    /* REMINDER POPUP */
+    .reminder-box { background: white; border-radius: 24px; padding: 2.5rem; max-width: 460px; width: 90%; box-shadow: 0 30px 80px rgba(0,0,0,0.2); position: relative; }
+    .reminder-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; color: #0f172a; }
+    .reminder-sub { color: #64748b; font-size: 0.95rem; margin-bottom: 1.5rem; }
+    .reminder-options { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
+    .reminder-option { display: flex; align-items: center; gap: 0.75rem; padding: 0.9rem 1rem; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+    .reminder-option:hover { border-color: #00b4d8; background: #f0fdff; }
+    .reminder-option.selected { border-color: #00b4d8; background: #e0f7fa; }
+    .reminder-option input[type="radio"] { accent-color: #00b4d8; width: 18px; height: 18px; }
+    .reminder-option-label { font-weight: 600; color: #0f172a; font-size: 0.95rem; }
+    .reminder-option-sub { font-size: 0.82rem; color: #64748b; }
+    .reminder-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .btn-never { background: #f1f5f9; color: #64748b; border: none; padding: 0.85rem; border-radius: 12px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.95rem; }
+    .btn-never:hover { background: #e2e8f0; }
+    .btn-set-reminder { background: linear-gradient(135deg, #00b4d8, #0077b6); color: white; border: none; padding: 0.85rem; border-radius: 12px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.95rem; }
+    .btn-set-reminder:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,180,216,0.35); }
+
+    /* REMINDER BANNER */
+    .reminder-banner { display: none; background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1.5px solid #f59e0b; border-radius: 16px; padding: 1rem 1.5rem; margin: 0 2rem 0; max-width: 1156px; margin-left: auto; margin-right: auto; margin-top: 1.5rem; }
+    .reminder-banner.show { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .reminder-banner-text { flex: 1; font-weight: 600; color: #92400e; }
+    .reminder-banner-sub { font-size: 0.85rem; color: #b45309; font-weight: 400; }
+    .banner-search-btn { background: #f59e0b; color: white; border: none; padding: 0.6rem 1.25rem; border-radius: 10px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap; }
+    .banner-dismiss { background: none; border: none; color: #b45309; cursor: pointer; font-size: 1.2rem; padding: 0.25rem; }
+
+    .loading { text-align: center; padding: 6rem 2rem; color: #64748b; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">🧬 PharmaConnect</div>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Find Medicines</a>
+        <a href="orders.html" class="nav-link">My Orders</a>
+        <button class="signout-btn" onclick="signOut()">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- REMINDER BANNER -->
+  <div class="reminder-banner" id="reminderBanner">
+    <span style="font-size:1.5rem;">⏰</span>
+    <div class="reminder-banner-text">
+      <div id="bannerText">Time to refill your medicine!</div>
+      <div class="reminder-banner-sub" id="bannerSub"></div>
+    </div>
+    <button class="banner-search-btn" onclick="searchFromBanner()">🔍 Search Now</button>
+    <button class="banner-dismiss" onclick="dismissBanner()" title="Dismiss">✕</button>
+  </div>
+
+  <section class="hero">
+    <div class="hero-container">
+      <h1>Find exactly what you <span style="background: linear-gradient(135deg, #00b4d8, #0077b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">need.</span></h1>
+      <p class="hero-subtitle">Search local pharmacies in real-time, check availability, and reserve your medicines instantly.</p>
+    </div>
+  </section>
+
+  <section class="search-section">
+    <div class="search-container">
+      <input type="text" class="search-input" id="medicineSearch" placeholder="Search Paracetamol, Dolo 650, Crocin etc..." />
+      <button class="search-btn" onclick="searchMedicines()">🔍 Search</button>
+    </div>
+  </section>
+
+  <section class="results-section" id="resultsSection" style="display:none;">
+    <div class="results-grid" id="resultsGrid"></div>
+  </section>
+
+  <!-- CONTACT POPUP -->
+  <div class="popup-overlay" id="contactPopup">
+    <div class="popup-box">
+      <button class="popup-close" onclick="closePopup('contactPopup')">✕</button>
+      <div class="popup-title" id="popupTitle"></div>
+      <div id="popupContent"></div>
+    </div>
+  </div>
+
+  <!-- REMINDER POPUP -->
+  <div class="popup-overlay" id="reminderPopup">
+    <div class="reminder-box">
+      <button class="popup-close" onclick="closePopup('reminderPopup')">✕</button>
+      <div class="reminder-title">⏰ Set Refill Reminder</div>
+      <div class="reminder-sub" id="reminderSubText">When should we remind you to refill?</div>
+      <div class="reminder-options" id="reminderOptions"></div>
+      <div class="reminder-btns">
+        <button class="btn-never" onclick="setNeverRemind()">🚫 Never Remind Again</button>
+        <button class="btn-set-reminder" onclick="confirmReminder()">✅ Set Reminder</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if (!sessionStorage.getItem('pharmaUser')) window.location.href = 'login.html';
+    function signOut() { sessionStorage.removeItem('pharmaUser'); window.location.href = 'login.html'; }
+
+    const medicines = {
+      "paracetamol": { name: "Paracetamol 500mg", desc: "Pain reliever & fever reducer", icon: "💊",
+        reminderOptions: [
+          { label: "3 days",  sub: "Short course — remind in 3 days",  days: 3  },
+          { label: "7 days",  sub: "Weekly supply — remind in 7 days", days: 7  },
+          { label: "14 days", sub: "2 week supply",                    days: 14 },
+        ]
+      },
+      "dolo": { name: "Dolo 650mg", desc: "Fever reducer", icon: "🌡️",
+        reminderOptions: [
+          { label: "3 days",  sub: "Fever course — remind in 3 days",  days: 3  },
+          { label: "5 days",  sub: "Extended course",                  days: 5  },
+          { label: "7 days",  sub: "Weekly supply",                    days: 7  },
+        ]
+      },
+      "crocin": { name: "Crocin 500mg", desc: "Pain relief", icon: "💊",
+        reminderOptions: [
+          { label: "5 days",  sub: "Short course",                     days: 5  },
+          { label: "7 days",  sub: "Weekly supply",                    days: 7  },
+          { label: "14 days", sub: "2 week supply",                    days: 14 },
+        ]
+      },
+      "amoxicillin": { name: "Amoxicillin 250mg", desc: "Antibiotic for bacterial infections", icon: "💉",
+        reminderOptions: [
+          { label: "5 days",  sub: "Standard antibiotic course",       days: 5  },
+          { label: "7 days",  sub: "Full 7-day antibiotic course",     days: 7  },
+          { label: "10 days", sub: "Extended antibiotic course",       days: 10 },
+        ]
+      },
+      "ibuprofen": { name: "Ibuprofen 400mg", desc: "Non-steroidal anti-inflammatory drug", icon: "💊",
+        reminderOptions: [
+          { label: "7 days",  subas: "Weekly supply",                    days: 7  },
+          { label: "14 days", sub: "2 week supply",                    days: 14 },
+          { label: "30 days", sub: "Monthly supply",                   days: 30 },
+        ]
+      }
+    };
+
+    const pharmacies = [
+      { id: 1, name: "City Med Store",      address: "Model Town, Ludhiana",  phone: "9876543210", delivery: true,  lat: 30.9000, lng: 75.8573 },
+      { id: 2, name: "HealthPlus Pharmacy", address: "Civil Lines, Ludhiana", phone: "9876543211", delivery: false, lat: 30.9050, lng: 75.8600 }
+    ];
+    
+
+    // Reminder state
+    let currentReminderMed = null;
+    let selectedReminderDays = null;
+    const user = sessionStorage.getItem('pharmaUser');
+
+    function getReminderKey(medName) { return `reminder_${user}_${medName.replace(/\s/g,'_')}`; }
+    function getNeverKey(medName)    { return `never_${user}_${medName.replace(/\s/g,'_')}`; }
+
+    // Check for due reminders on page load
+    function checkReminders() {
+      const banner = document.getElementById('reminderBanner');
+      const due = [];
+      Object.keys(localStorage).forEach(key => {
+        if (!key.startsWith(`reminder_${user}_`)) return;
+        const data = JSON.parse(localStorage.getItem(key) || 'null');
+        if (!data) return;
+        const daysLeft = Math.floor((data.remindAt - Date.now()) / 86400000);
+        if (daysLeft <= 1) due.push({ ...data, key });
+      });
+      if (due.length) {
+        const first = due[0];
+        document.getElementById('bannerText').textContent = `⏰ Time to refill ${first.medName}!`;
+        document.getElementById('bannerSub').textContent  = `You ordered it ${first.daysSet} days ago. Running low?`;
+        banner.classList.add('show');
+        banner.dataset.med = first.medName;
+      }
+    }
+
+    function dismissBanner() { document.getElementById('reminderBanner').classList.remove('show'); }
+    function searchFromBanner() {
+      const med = document.getElementById('reminderBanner').dataset.med || '';
+      document.getElementById('medicineSearch').value = med.split(' ')[0].toLowerCase();
+      searchMedicines();
+      dismissBanner();
+    }
+
+    async function searchMedicines() {
+      const query = document.getElementById('medicineSearch').value.toLowerCase().trim();
+      const resultsSection = document.getElementById('resultsSection');
+      const resultsGrid = document.getElementById('resultsGrid');
+      resultsGrid.innerHTML = '<div class="loading">🔍 Searching pharmacies near you...</div>';
+      resultsSection.style.display = 'block';
+      await new Promise(r => setTimeout(r, 800));
+      const matchKey = Object.keys(medicines).find(k => query.includes(k));
+      if (!matchKey) { resultsGrid.innerHTML = '<div class="loading">😔 No medicines found. Try "Paracetamol", "Dolo", or "Crocin"</div>'; return; }
+      const medicine = medicines[matchKey];
+      resultsGrid.innerHTML = pharmacies.map((pharmacy, index) => `
+        <div class="medicine-card">
+          <div class="medicine-wave"></div>
+          <div class="medicine-header">
+            <div class="medicine-icon">${medicine.icon}</div>
+            <div>
+              <div class="medicine-name">${medicine.name}</div>
+              <div class="medicine-desc">${medicine.desc}</div>
+            </div>
+          </div>
+          <div class="pharmacy-info">
+            <span style="font-size:1.2rem;">🏪</span>
+            <span class="pharmacy-name">${pharmacy.name}</span>
+            <span class="delivery-badge ${pharmacy.delivery ? 'delivery-yes' : 'delivery-no'}">${pharmacy.delivery ? '🚚 Delivery Available' : '🚫 No Delivery'}</span>
+            <span class="pharmacy-addr">📍 ${pharmacy.address} · ${(1.2 + index * 0.5).toFixed(1)}km away</span>
+          </div>
+          <div class="price-stock">
+            <div><div class="price">₹${25 + index * 2}</div><div class="stock">30+ in stock</div></div>
+          </div>
+          <div class="action-btns">
+            <button class="btn-order ${pharmacy.delivery ? 'delivery-on' : 'delivery-off'}"
+              ${pharmacy.delivery ? `onclick="orderMedicine(${pharmacy.id}, '${matchKey}')"` : 'disabled'}
+              title="${pharmacy.delivery ? 'Order with Home Delivery' : 'Home Delivery Not Available'}">
+              🛒 Order
+            </button>
+            <button class="btn-contact"  onclick="showContact(${pharmacy.id})">📞 Contact</button>
+            <button class="btn-location" onclick="openLocation(${pharmacy.lat}, ${pharmacy.lng})">📍 Location</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function orderMedicine(pharmacyId, medKey) {
+      const pharmacy = pharmacies.find(p => p.id === pharmacyId);
+      const medicine = medicines[medKey];
+      alert(`✅ Order placed for ${medicine.name} at ${pharmacy.name}!\nWe'll confirm your delivery shortly.`);
+
+      // Check if "never remind" is set
+      const neverKey = getNeverKey(medicine.name);
+      if (localStorage.getItem(neverKey) === 'true') return;
+
+      // Show reminder popup — reset any existing reminder since they just bought it
+      localStorage.removeItem(getReminderKey(medicine.name));
+      showReminderPopup(medKey);
+    }
+
+    function showReminderPopup(medKey) {
+      const medicine = medicines[medKey];
+      currentReminderMed = medKey;
+      selectedReminderDays = null;
+      document.getElementById('reminderSubText').textContent = `When should we remind you to refill ${medicine.name}?`;
+      document.getElementById('reminderOptions').innerHTML = medicine.reminderOptions.map((opt, i) => `
+        <label class="reminder-option" id="ropt_${i}" onclick="selectReminder(${opt.days}, ${i})">
+          <input type="radio" name="reminderChoice" value="${opt.days}" />
+          <div>
+            <div class="reminder-option-label">${opt.label}</div>
+            <div class="reminder-option-sub">${opt.sub}</div>
+          </div>
+        </label>
+      `).join('');
+      document.getElementById('reminderPopup').classList.add('active');
+    }
+
+    function selectReminder(days, idx) {
+      selectedReminderDays = days;
+      document.querySelectorAll('.reminder-option').forEach((el, i) => {
+        el.classList.toggle('selected', i === idx);
+        el.querySelector('input').checked = (i === idx);
+      });
+    }
+
+    function confirmReminder() {
+      if (!selectedReminderDays) { alert('⚠️ Please select a reminder time.'); return; }
+      const medicine = medicines[currentReminderMed];
+      const remindAt = Date.now() + (selectedReminderDays * 86400000);
+      localStorage.setItem(getReminderKey(medicine.name), JSON.stringify({
+        medName: medicine.name, medKey: currentReminderMed,
+        daysSet: selectedReminderDays, remindAt
+      }));
+      closePopup('reminderPopup');
+      alert(`✅ Reminder set! We'll remind you to refill ${medicine.name} in ${selectedReminderDays} days.`);
+    }
+
+    function setNeverRemind() {
+      if (!currentReminderMed) return;
+      const medicine = medicines[currentReminderMed];
+      localStorage.setItem(getNeverKey(medicine.name), 'true');
+      localStorage.removeItem(getReminderKey(medicine.name));
+      closePopup('reminderPopup');
+      alert(`🚫 Got it! We'll never remind you about ${medicine.name} again.\nThis will reset if you order it again.`);
+    }
+
+    function showContact(pharmacyId) {
+      const p = pharmacies.find(ph => ph.id === pharmacyId);
+      document.getElementById('popupTitle').textContent = `📞 ${p.name}`;
+      document.getElementById('popupContent').innerHTML = `
+        <div class="popup-row"><span class="popup-row-icon">🏪</span><div><div class="popup-row-label">Store Name</div><div class="popup-row-val">${p.name}</div></div></div>
+        <div class="popup-row"><span class="popup-row-icon">📍</span><div><div class="popup-row-label">Address</div><div class="popup-row-val">${p.address}</div></div></div>
+        <div class="popup-row"><span class="popup-row-icon">📱</span><div><div class="popup-row-label">Phone Number</div><div class="popup-row-val">${p.phone}</div></div></div>
+        <div class="popup-row"><span class="popup-row-icon">🚚</span><div><div class="popup-row-label">Home Delivery</div><div class="popup-row-val">${p.delivery ? '✅ Available' : '❌ Not Available'}</div></div></div>
+        <a class="call-btn" href="tel:${p.phone}">📞 Call ${p.phone}</a>
+      `;
+      document.getElementById('contactPopup').classList.add('active');
+    }
+
+    function closePopup(id) { document.getElementById(id).classList.remove('active'); }
+    function openLocation(lat, lng) { window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank'); }
+
+    document.querySelectorAll('.popup-overlay').forEach(el => {
+      el.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
+    });
+    document.getElementById('medicineSearch').addEventListener('keydown', e => { if (e.key === 'Enter') searchMedicines(); });
+
+    checkReminders();
+  </script>
+</body>
+</html>
